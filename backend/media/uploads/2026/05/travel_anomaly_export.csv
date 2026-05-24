@@ -1,0 +1,4 @@
+trip_id,employee_id,travel_type,origin,destination,distance_km,amount_inr,travel_date
+TRIP-5001,EMP-11,FLIGHT,BOM,JFK,,125000,2026-05-05
+TRIP-5002,EMP-27,GROUND_TRANSPORT,Pune,Mumbai,12000,3000,2026-05-07
+TRIP-5003,EMP-44,HOTEL,Delhi,Delhi,,45000,2026-05-09

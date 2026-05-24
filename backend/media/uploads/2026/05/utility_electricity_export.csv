@@ -1,0 +1,4 @@
+meter_id,billing_start,billing_end,kwh_usage,peak_demand_kw,tariff_type,cost_inr
+MTR-8821,2026-04-01,2026-04-29,18240,420,Industrial TOD,224180
+MTR-8822,2026-04-15,2026-05-14,12890,300,Commercial,145500
+MTR-8823,2026-05-01,2026-05-31,24000,515,Industrial TOD,310920
