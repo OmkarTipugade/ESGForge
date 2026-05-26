@@ -38,6 +38,8 @@ class DataSourceSerializer(serializers.ModelSerializer):
             "successful_rows",
             "failed_rows",
             "error_summary",
+            "error_categories",
+            "processing_error",
             "uploaded_by_name",
             "uploaded_at",
             "processed_at",

@@ -22,9 +22,51 @@ from emissionRecord.models import EmissionRecord
 from auditLog.models import AuditLog
 
 from .parsers import get_parser
+from .parsers.base import ParseError
 from .validators import validate_record
 
 logger = logging.getLogger(__name__)
+
+
+def build_parse_error_report(parse_errors: list[ParseError]) -> tuple[dict, dict]:
+    """
+    Split parse failures into row-level messages and aggregate category counts.
+
+    error_summary consumers expect every value to be a string error message keyed
+    by row number; category totals belong in error_categories.
+    """
+    row_errors: dict[str, str] = {}
+    missing_cols_count = 0
+    invalid_units_count = 0
+
+    for pe in parse_errors:
+        error_msg = pe.error
+        row_errors[str(pe.row_number)] = error_msg
+
+        err_lower = error_msg.lower()
+        if (
+            "missing required columns" in err_lower
+            or "missing quantity" in err_lower
+            or "missing expense" in err_lower
+        ):
+            missing_cols_count += 1
+        elif (
+            "unknown unit" in err_lower
+            or "unit mismatch" in err_lower
+            or "unhandled category" in err_lower
+        ):
+            invalid_units_count += 1
+
+    categories: dict[str, int] = {
+        "missing_columns": missing_cols_count,
+        "invalid_units": invalid_units_count,
+    }
+    return row_errors, categories
+
+
+def empty_error_categories() -> dict[str, int]:
+    """Default category counts when no parse errors are available."""
+    return {"missing_columns": 0, "invalid_units": 0}
 
 
 @shared_task(bind=True, max_retries=2, default_retry_delay=30)
@@ -118,25 +160,8 @@ def process_upload(self, data_source_id: int, user_id: int | None = None):
                 record.save(update_fields=["status", "flag_reasons"])
                 flagged_count += 1
 
-        # Store error summary with aggregated category counts
-        error_dict = {}
-        missing_cols_count = 0
-        invalid_units_count = 0
-
-        for pe in parse_errors:
-            error_msg = pe.error
-            error_dict[str(pe.row_number)] = error_msg
-
-            # Classify the error type
-            err_lower = error_msg.lower()
-            if "missing required columns" in err_lower or "missing quantity" in err_lower or "missing expense" in err_lower:
-                missing_cols_count += 1
-            elif "unknown unit" in err_lower or "unit mismatch" in err_lower or "unhandled category" in err_lower:
-                invalid_units_count += 1
-
-        error_dict["missing_columns"] = missing_cols_count
-        error_dict["invalid_units"] = invalid_units_count
-        ds.error_summary = error_dict
+        ds.error_summary, ds.error_categories = build_parse_error_report(parse_errors)
+        ds.processing_error = ""
 
         # Set final status
         if ds.failed_rows == 0:
@@ -158,7 +183,9 @@ def process_upload(self, data_source_id: int, user_id: int | None = None):
     except Exception as exc:
         logger.exception(f"Fatal error processing DataSource {data_source_id}")
         ds.status = "FAILED"
-        ds.error_summary = {"fatal": str(exc)}
+        ds.error_summary = {}
+        ds.error_categories = empty_error_categories()
+        ds.processing_error = str(exc)
         ds.processed_at = timezone.now()
         ds.save()
         raise self.retry(exc=exc)

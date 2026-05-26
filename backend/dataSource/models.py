@@ -53,6 +53,13 @@ class DataSource(models.Model):
     # Row-level error details: { "3": "Invalid date format", "17": "Missing unit" }
     error_summary = models.JSONField(default=dict, blank=True)
 
+    # Aggregated parse-error counts by category. Values are always integers,
+    # e.g. {"missing_columns": 5, "invalid_units": 2}.
+    error_categories = models.JSONField(default=dict, blank=True)
+
+    # Fatal / unexpected processing failure (not a row-level or category count).
+    processing_error = models.TextField(blank=True, default="")
+
     uploaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
