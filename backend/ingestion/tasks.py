@@ -118,10 +118,24 @@ def process_upload(self, data_source_id: int, user_id: int | None = None):
                 record.save(update_fields=["status", "flag_reasons"])
                 flagged_count += 1
 
-        # Store error summary
+        # Store error summary with aggregated category counts
         error_dict = {}
+        missing_cols_count = 0
+        invalid_units_count = 0
+
         for pe in parse_errors:
-            error_dict[str(pe.row_number)] = pe.error
+            error_msg = pe.error
+            error_dict[str(pe.row_number)] = error_msg
+
+            # Classify the error type
+            err_lower = error_msg.lower()
+            if "missing required columns" in err_lower or "missing quantity" in err_lower or "missing expense" in err_lower:
+                missing_cols_count += 1
+            elif "unknown unit" in err_lower or "unit mismatch" in err_lower or "unhandled category" in err_lower:
+                invalid_units_count += 1
+
+        error_dict["missing_columns"] = missing_cols_count
+        error_dict["invalid_units"] = invalid_units_count
         ds.error_summary = error_dict
 
         # Set final status
