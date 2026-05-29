@@ -92,7 +92,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
 
           if (collapsed) {
             return (
-              <Tooltip key={item.to} delay={0}>
+              <Tooltip key={item.to}>
                 <TooltipTrigger render={<span />}>
                   {link}
                 </TooltipTrigger>
