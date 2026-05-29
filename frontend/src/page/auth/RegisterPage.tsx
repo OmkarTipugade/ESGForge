@@ -59,7 +59,7 @@ const RegisterPage: React.FC = () => {
   return (
     <div className="flex min-h-screen">
       {/* Left panel — branding */}
-      <div className="hidden w-[480px] flex-col justify-between bg-slate-950 px-12 py-10 lg:flex">
+      <div className="hidden w-120 flex-col justify-between bg-slate-950 px-12 py-10 lg:flex">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600">
             <Leaf className="h-5 w-5 text-white" />
