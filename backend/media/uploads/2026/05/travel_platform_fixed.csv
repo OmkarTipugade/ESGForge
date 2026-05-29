@@ -1,4 +1,0 @@
-trip_id,employee_id,expense_type,origin,destination,distance_km,amount_inr,travel_date
-TRIP-1001,EMP-91,FLIGHT,PNQ,DEL,,18200,2026-05-02
-TRIP-1002,EMP-14,HOTEL,Mumbai,Bengaluru,,9800,2026-05-07
-TRIP-1003,EMP-42,GROUND_TRANSPORT,Pune,Mumbai,152,4200,2026-05-11

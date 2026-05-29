@@ -149,6 +149,8 @@ class ReviewView(APIView):
             flag_reasons = serializer.validated_data.get("flag_reasons", [])
             if flag_reasons:
                 record.flag_reasons = flag_reasons
+            record.reviewer = request.user
+            record.reviewed_at = timezone.now()
             record.review_notes = notes
             record.save()
 
